@@ -21,7 +21,7 @@ Get-IbReport -Query 123456
 Get-IbReport 123456
 
 .Example
-Get-IbReport 562838 | Sort-Object settledate | Select-Object -Last 15 | Format-Table
+Get-IbReport 123456 | Sort-Object settledate | Select-Object -Last 15 | Format-Table
 
 .LINK
 Online version: https://www.interactivebrokers.com/en/software/am/am/reports/flex_web_service_version_3.htm
