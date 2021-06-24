@@ -34,11 +34,11 @@ function Get-IbReport {
     [string]$Query,
     [switch]$Token
   )
-	$path = [Environment]::GetFolderPath('ApplicationData')
-	  $Colors = @{
-	  ForegroundColor = "White"
-	  BackgroundColor = "Red"
-	  }
+  $path = [Environment]::GetFolderPath('ApplicationData')
+  $Colors = @{
+    ForegroundColor = "White"
+    BackgroundColor = "Red"
+  }
   if ($token -ne $true) {
     if ((Test-Path "$path\IbToken.txt") -ne $true) {
       Write-Host "Please run 'Get-IbReport -Token' to provide Interactive Brokers token (Missing)" @colors
@@ -61,46 +61,46 @@ function Get-IbReport {
       }
 
 
-		  try { $response = Invoke-WebRequest $init_url -Body $Body -Method 'POST' } catch { Write-host @colors $_.Exception.Response.StatusCode.Value__ $_.Exception.Response.StatusCode }	
-			
-			
-			[xml]$ib_ref = $response.Content
-			
-			$status = $ib_ref.FlexStatementResponse.status
-			$errorCode = $ib_ref.FlexStatementResponse.ErrorCode
-			$errorMessage = $ib_ref.FlexStatementResponse.ErrorMessage
-			
-			if ($status -eq "Fail") {
-				Write-host "$errorCode $status $errorMessage" @colors
-			}
+      try { $response = Invoke-WebRequest $init_url -Body $Body -Method 'POST' } catch { Write-Host @colors $_.Exception.Response.StatusCode.Value__ $_.Exception.Response.StatusCode }
 
-      else{
 
-      # Display IB Response Code
-      # $ib_ref.FlexStatementResponse.ReferenceCode
+      [xml]$ib_ref = $response.Content
 
-      #Retrieve statement data
-      $Body = @{
-        q = $ib_ref.FlexStatementResponse.ReferenceCode
-        t = $ib_token
-        v = $ib_version
-      }
-      $response = Invoke-WebRequest $getdata_url -Body $Body -Method 'POST'
-      [xml]$xml = $response.Content
+      $status = $ib_ref.FlexStatementResponse.status
+      $errorCode = $ib_ref.FlexStatementResponse.ErrorCode
+      $errorMessage = $ib_ref.FlexStatementResponse.ErrorMessage
 
-      #TCF
-      if ($xml.FlexQueryResponse.type -eq "TCF") {
-        $result = $xml.FlexQueryResponse.FlexStatements.FlexStatement.TradeConfirms.TradeConfirm
+      if ($status -eq "Fail") {
+        Write-Host "$errorCode $status $errorMessage" @colors
       }
 
-      #AF
-      if ($xml.FlexQueryResponse.type -eq "AF") {
-        $result = $xml.FlexQueryResponse.FlexStatements.FlexStatement.ChangeInDividendAccruals.ChangeInDividendAccrual
-      }
+      else {
 
-      #Print result
-      return $result
-	}
+        # Display IB Response Code
+        # $ib_ref.FlexStatementResponse.ReferenceCode
+
+        #Retrieve statement data
+        $Body = @{
+          q = $ib_ref.FlexStatementResponse.ReferenceCode
+          t = $ib_token
+          v = $ib_version
+        }
+        $response = Invoke-WebRequest $getdata_url -Body $Body -Method 'POST'
+        [xml]$xml = $response.Content
+
+        #TCF
+        if ($xml.FlexQueryResponse.type -eq "TCF") {
+          $result = $xml.FlexQueryResponse.FlexStatements.FlexStatement.TradeConfirms.TradeConfirm
+        }
+
+        #AF
+        if ($xml.FlexQueryResponse.type -eq "AF") {
+          $result = $xml.FlexQueryResponse.FlexStatements.FlexStatement.ChangeInDividendAccruals.ChangeInDividendAccrual
+        }
+
+        #Print result
+        return $result
+      }
     }
   }
   else {
